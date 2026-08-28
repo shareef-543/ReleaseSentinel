@@ -133,6 +133,12 @@ export interface AnalysisResult {
   traditional_ci: { decision: ReleaseDecision; reason: string };
   early_detection: boolean;
   impact_reduction: { traditional_users: number; sentinel_users: number; reduction_pct: number };
+  project_risk: {
+    schedule_risk: { score: number; level: 'Low' | 'Medium' | 'High' };
+    budget_risk: { score: number; level: 'Low' | 'Medium' | 'High' };
+    resource_risk: { score: number; level: 'Low' | 'Medium' | 'High' };
+    quality_risk: { score: number; level: 'Low' | 'Medium' | 'High' };
+  };
 }
 
 export interface SimulatedMetric {

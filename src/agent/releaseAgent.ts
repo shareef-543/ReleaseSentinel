@@ -22,6 +22,7 @@ import {
   buildRiskContributors,
 } from '@/ml/models';
 import { HISTORICAL_INCIDENTS, HISTORICAL_RELEASES, MODULES } from '@/data/seed';
+import { predictProjectRisks } from '@/ml/projectRiskModel';
 
 const RISK_WEIGHTS = {
   code_change: 0.30,
@@ -34,6 +35,7 @@ const RISK_WEIGHTS = {
 export function analyzeRelease(manifest: ReleaseManifest): AnalysisResult {
   // ── Run all intelligence components ──
   const moduleRisks = computeModuleRisk(manifest, HISTORICAL_INCIDENTS, HISTORICAL_RELEASES);
+  const projectRisk = predictProjectRisks(manifest, moduleRisks);
   const codeChangeRisk = computeCodeChangeRisk(moduleRisks);
 
   const testResult = computeTestRisk(manifest);
@@ -115,6 +117,7 @@ export function analyzeRelease(manifest: ReleaseManifest): AnalysisResult {
     { component: 'Failure Mode Prediction', note: 'Weighted combination of incident similarity scores and module-risk-derived probabilities.' },
     { component: 'Production Impact', note: 'Weighted scoring over module criticality, affected users, transaction importance, and historical severity.' },
     { component: 'Rollout Optimizer', note: 'Exposure-scaled risk calculation across 10%/50%/100% strategies with safety-threshold-based recommendation.' },
+    { component: 'Multi-Task Project Risk', note: 'Browser-native predictor aligned with risk_model.py outputs: schedule, budget, resource, and quality risk.' },
   ];
 
   return {
@@ -135,6 +138,7 @@ export function analyzeRelease(manifest: ReleaseManifest): AnalysisResult {
     traditional_ci: traditionalCi,
     early_detection: earlyDetection,
     impact_reduction: { traditional_users: traditionalUsers, sentinel_users: sentinelUsers, reduction_pct: reductionPct },
+    project_risk: projectRisk,
   };
 }
 

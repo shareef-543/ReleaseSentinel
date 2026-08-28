@@ -32,6 +32,21 @@ export function Recommendation({ analysis }: Props) {
         <p className="text-sm text-slate-200 leading-relaxed">{analysis.reasoning}</p>
       </div>
 
+      <div className="mb-4">
+        <div className="text-xs text-slate-500 uppercase mb-2">Multi-Task Project Risk Model</div>
+        <div className="grid grid-cols-2 gap-2">
+          {Object.entries(analysis.project_risk).map(([label, prediction]) => (
+            <div key={label} className="rounded-lg border border-slate-700 bg-slate-800/30 p-2.5">
+              <div className="text-[10px] text-slate-500 uppercase">{label.replace('_risk', '')}</div>
+              <div className="flex items-center justify-between mt-1">
+                <span className="text-sm font-mono font-bold text-cyan-300">{Math.round(prediction.score * 100)}%</span>
+                <span className="text-[10px] text-slate-400">{prediction.level}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Risk contributors */}
       <div className="mb-4">
         <div className="text-xs text-slate-500 uppercase mb-2">Risk Contributors (Explainability)</div>
