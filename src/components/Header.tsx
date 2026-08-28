@@ -14,6 +14,7 @@ import {
   Settings,
   Sparkles,
   Zap,
+  Code2,
 } from 'lucide-react';
 
 interface Props {
@@ -21,8 +22,8 @@ interface Props {
   analysis: AnalysisResult | null;
   analyzing: boolean;
   progressStep: number;
-  activeView: 'pipeline' | 'dashboard' | 'studio' | 'history';
-  onSelectView: (view: 'pipeline' | 'dashboard' | 'studio' | 'history') => void;
+  activeView: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history';
+  onSelectView: (view: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history') => void;
   onOpenSettings: () => void;
 }
 
@@ -82,7 +83,19 @@ export function Header({
                 }`}
               >
                 <Zap className="h-3.5 w-3.5" />
-                <span>Autonomous Pipeline</span>
+                <span>Risk Pipeline</span>
+              </button>
+
+              <button
+                onClick={() => onSelectView('code')}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                  activeView === 'code'
+                    ? 'bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                }`}
+              >
+                <Code2 className="h-3.5 w-3.5" />
+                <span>Code Corrector</span>
               </button>
 
               <button

@@ -23,10 +23,11 @@ import { AICorrectionStudio } from '@/components/AICorrectionStudio';
 import { BackendHistory } from '@/components/BackendHistory';
 import { SettingsModal } from '@/components/SettingsModal';
 import { AutonomousHealingPipeline } from '@/components/AutonomousHealingPipeline';
+import { CodeCorrectionPipeline } from '@/components/CodeCorrectionPipeline';
 import { Wand2, Database, ShieldCheck, ArrowRight, Zap } from 'lucide-react';
 
 function App() {
-  const [activeView, setActiveView] = useState<'pipeline' | 'dashboard' | 'studio' | 'history'>('pipeline');
+  const [activeView, setActiveView] = useState<'pipeline' | 'code' | 'dashboard' | 'studio' | 'history'>('pipeline');
   const [manifest, setManifest] = useState<ReleaseManifest>(SAMPLE_MANIFEST);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -280,6 +281,11 @@ function App() {
         )}
 
         {/* VIEW 3: ML DIAGNOSTIC & AI HEALING STUDIO */}
+        {activeView === 'code' && (
+          <CodeCorrectionPipeline />
+        )}
+
+        {/* VIEW 4: ML DIAGNOSTIC & AI HEALING STUDIO */}
         {activeView === 'studio' && (
           <AICorrectionStudio
             onApplyManifest={handleApplyFromStudio}
