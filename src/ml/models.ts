@@ -11,7 +11,7 @@ import type {
   SuspiciousEvidence,
   FailureMode,
 } from '@/types';
-import { MODULES, HISTORICAL_INCIDENTS, FAILURE_MODE_LABELS } from '@/data/seed';
+import { MODULES, HISTORICAL_INCIDENTS, HISTORICAL_RELEASES, FAILURE_MODE_LABELS } from '@/data/seed';
 
 const moduleMap = new Map(MODULES.map((m) => [m.name, m]));
 
@@ -152,6 +152,47 @@ export function computeCodeChangeRisk(moduleRisks: ModuleRisk[]): number {
 
 // ── B. Test Failure Prediction ─────────────────────────────────
 
+function releaseFeatures(release: Pick<ReleaseManifest, 'tests' | 'test_coverage' | 'dependencies' | 'changed_files' | 'changed_modules'>): number[] {
+  const totalTests = release.tests.passed + release.tests.failed + release.tests.flaky;
+  return [
+    1,
+    totalTests > 0 ? release.tests.failed / totalTests : 0,
+    totalTests > 0 ? release.tests.flaky / totalTests : 0,
+    1 - (release.test_coverage ?? 70) / 100,
+    release.dependencies.length > 0 ? 1 : 0,
+    Math.min(release.changed_files.length, 10) / 10,
+    Math.min(release.changed_modules.length, 5) / 5,
+  ];
+}
+
+function sigmoid(value: number): number {
+  return 1 / (1 + Math.exp(-value));
+}
+
+function trainFailureModel(releases: HistoricalRelease[]): number[] {
+  const weights = new Array(7).fill(0) as number[];
+  const learningRate = 0.8;
+
+  for (let epoch = 0; epoch < 800; epoch++) {
+    const gradients = new Array(7).fill(0) as number[];
+    for (const release of releases) {
+      const features = releaseFeatures({
+        tests: { passed: release.tests_passed, failed: release.tests_failed, flaky: release.tests_flaky },
+        test_coverage: release.test_coverage,
+        dependencies: release.dependencies,
+        changed_files: release.changed_files,
+        changed_modules: release.changed_modules,
+      });
+      const prediction = sigmoid(weights.reduce((sum, weight, index) => sum + weight * features[index], 0));
+      const error = prediction - (release.result === 'success' ? 0 : 1);
+      features.forEach((feature, index) => { gradients[index] += error * feature; });
+    }
+    weights.forEach((_, index) => { weights[index] -= (learningRate * gradients[index]) / releases.length; });
+  }
+
+  return weights;
+}
+
 export function computeTestRisk(manifest: ReleaseManifest): {
   score: number;
   probability: number;
@@ -161,23 +202,17 @@ export function computeTestRisk(manifest: ReleaseManifest): {
   const total = passed + failed + flaky;
   const reasons: string[] = [];
 
-  const failRate = total > 0 ? failed / total : 0;
-  const flakyRate = total > 0 ? flaky / total : 0;
   const coverage = manifest.test_coverage ?? 70;
 
   if (failed > 0) reasons.push(`${failed} test(s) failed out of ${total}`);
   if (flaky > 0) reasons.push(`${flaky} flaky test(s) — reliability signal`);
   if (coverage < 75) reasons.push(`Test coverage below recommended threshold (${coverage}%)`);
 
-  // Logistic-style probability (deterministic, explainable)
-  const z =
-    -2.5 +
-    failed * 0.9 +
-    flaky * 0.35 +
-    (100 - coverage) * 0.025 +
-    failRate * 3.0 +
-    flakyRate * 1.5;
-  const probability = clamp(1 / (1 + Math.exp(-z)) * 100, 0, 100);
+  const modelWeights = trainFailureModel(HISTORICAL_RELEASES);
+  const features = releaseFeatures(manifest);
+  const modelProbability = sigmoid(modelWeights.reduce((sum, weight, index) => sum + weight * features[index], 0));
+  const probability = clamp(modelProbability * 100, 0, 100);
+  reasons.push(`Trained logistic model evaluated ${HISTORICAL_RELEASES.length} historical releases`);
 
   const score = clamp(probability * 0.7 + (100 - coverage) * 0.3, 0, 100);
 

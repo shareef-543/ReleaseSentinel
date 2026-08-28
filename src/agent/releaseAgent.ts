@@ -110,7 +110,7 @@ export function analyzeRelease(manifest: ReleaseManifest): AnalysisResult {
   // ── ML notes ──
   const mlNotes = [
     { component: 'Code Change Risk', note: 'Hybrid: rule-based features (criticality, file count, dependency changes) + historical release-failure-rate signal. Labeled as deterministic risk signals.' },
-    { component: 'Test Failure Prediction', note: 'Logistic model over test features (failed, flaky, coverage). Deterministic — no training data required.' },
+    { component: 'Test Failure Prediction', note: 'Logistic regression trained at runtime on historical release outcomes using failed-test rate, flaky-test rate, coverage, dependency changes, file count, and module count.' },
     { component: 'Incident Similarity', note: 'TF-IDF vectorization + cosine similarity over incident corpus. Real NLP computation, not a lookup table.' },
     { component: 'Failure Mode Prediction', note: 'Weighted combination of incident similarity scores and module-risk-derived probabilities.' },
     { component: 'Production Impact', note: 'Weighted scoring over module criticality, affected users, transaction importance, and historical severity.' },
