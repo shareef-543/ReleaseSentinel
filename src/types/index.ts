@@ -176,3 +176,75 @@ export interface Reassessment {
   prediction_deviation: number;
   threshold_breached: boolean;
 }
+
+export type ProblemCategory =
+  | 'syntax'
+  | 'schema'
+  | 'risk_anomaly'
+  | 'test_regression'
+  | 'blast_radius'
+  | 'dependency'
+  | 'security';
+
+export type ProblemSeverity = 'info' | 'warning' | 'medium' | 'high' | 'critical';
+
+export interface FileProblem {
+  id: string;
+  title: string;
+  category: ProblemCategory;
+  severity: ProblemSeverity;
+  details: string;
+  location?: string;
+  suggestedFix: string;
+  confidence: number; // 0 - 100
+}
+
+export interface FileMLAnalysisResult {
+  fileName?: string;
+  isValidJson: boolean;
+  healthScore: number; // 0 - 100 (100 is perfect)
+  anomalyScore: number; // 0 - 100 (100 is extreme anomaly)
+  problems: FileProblem[];
+  extractedManifest: Partial<ReleaseManifest> | null;
+  featureSignals: {
+    name: string;
+    value: number | string;
+    impact: 'positive' | 'neutral' | 'negative' | 'critical';
+    description: string;
+  }[];
+  summary: string;
+}
+
+export interface StoredAnalysisRecord {
+  id: string;
+  release_id: string;
+  created_at: string;
+  overall_risk: number;
+  decision: ReleaseDecision;
+  manifest: ReleaseManifest;
+  analysis: AnalysisResult;
+  simulation?: RolloutSimulation;
+  reassessment?: Reassessment;
+  source: 'manual' | 'sample' | 'ai_corrected' | 'file_upload';
+  notes?: string;
+}
+
+export interface StoredCorrectionRecord {
+  id: string;
+  release_id: string;
+  created_at: string;
+  original_snippet: string;
+  corrected_manifest: ReleaseManifest;
+  problems_found: number;
+  corrections_count: number;
+  source: 'gemini' | 'fallback';
+}
+
+export interface BackendConfig {
+  supabaseUrl: string;
+  supabaseAnonKey: string;
+  geminiApiKey: string;
+  autoSaveAnalyses: boolean;
+  storageMode: 'supabase' | 'local';
+}
+
