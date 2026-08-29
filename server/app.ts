@@ -68,9 +68,12 @@ app.get('/', (_req, res) => {
 if (config.nodeEnv === 'production') {
   const distPath = path.join(__dirname, '../dist');
   app.use(express.static(distPath));
-  // All non-API routes go to React's index.html (client-side routing)
-  app.get('*', (_req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'));
+  // All non-API routes fallback to index.html for client-side routing
+  app.use((req, res, next) => {
+    if (req.method === 'GET' && !req.path.startsWith('/api')) {
+      return res.sendFile(path.join(distPath, 'index.html'));
+    }
+    next();
   });
 }
 
