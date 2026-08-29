@@ -6,8 +6,10 @@
   "scripts": {
     "dev": "vite",
     "server": "tsx server/app.ts",
+    "start": "tsx server/app.ts",
     "dev:all": "concurrently \"npm run server\" \"npm run dev\"",
     "build": "vite build",
+    "build:prod": "vite build && tsx server/app.ts",
     "lint": "eslint .",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"

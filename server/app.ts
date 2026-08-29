@@ -1,9 +1,14 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { config } from './config/env.js';
 import { CONSTANTS } from './config/constants.js';
 import { requestLogger } from './middlewares/logger.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Route modules
 import healthRouter from './routes/health.js';
@@ -58,6 +63,16 @@ app.get('/', (_req, res) => {
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.send(html);
 });
+
+// ── Production: Serve built React frontend ──
+if (config.nodeEnv === 'production') {
+  const distPath = path.join(__dirname, '../dist');
+  app.use(express.static(distPath));
+  // All non-API routes go to React's index.html (client-side routing)
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(distPath, 'index.html'));
+  });
+}
 
 // ── 404 & Global Error Handler (must be last) ──
 app.use(notFoundHandler);

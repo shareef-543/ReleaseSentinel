@@ -1,0 +1,26 @@
+﻿# render.yaml — Render.com deployment configuration
+# This file auto-configures your service on Render
+# Docs: https://render.com/docs/render-yaml
+
+services:
+  - type: web
+    name: releasesentinel-api
+    runtime: node
+    region: singapore
+    plan: free
+    branch: main
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: '*'
