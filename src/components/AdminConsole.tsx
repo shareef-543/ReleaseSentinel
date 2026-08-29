@@ -22,6 +22,8 @@ import {
   Terminal,
 } from 'lucide-react';
 
+import { DatabaseExplorer } from '@/components/DatabaseExplorer';
+
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
 interface AdminStats {
@@ -58,7 +60,7 @@ interface SystemConfig {
 
 export function AdminConsole() {
   const { token, user: currentUser } = useAuth();
-  const [activeTab, setActiveTab] = useState<'users' | 'audit' | 'config'>('users');
+  const [activeTab, setActiveTab] = useState<'database' | 'users' | 'audit' | 'config'>('database');
 
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<SafeUser[]>([]);
@@ -465,6 +467,18 @@ export function AdminConsole() {
       {/* Tabs Navigation */}
       <div className="flex items-center gap-1 border-b border-slate-800 pb-2">
         <button
+          onClick={() => setActiveTab('database')}
+          className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+            activeTab === 'database'
+              ? 'bg-purple-600 text-white shadow-sm'
+              : 'text-purple-300 hover:text-white hover:bg-slate-800/50'
+          }`}
+        >
+          <Database className="h-3.5 w-3.5 text-cyan-400" />
+          <span>🗄️ Database Explorer</span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('users')}
           className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-semibold transition-all ${
             activeTab === 'users'
@@ -500,6 +514,11 @@ export function AdminConsole() {
           <span>AI & System Settings</span>
         </button>
       </div>
+
+      {/* TAB 0: DATABASE EXPLORER */}
+      {activeTab === 'database' && (
+        <DatabaseExplorer onNotification={showNotification} />
+      )}
 
       {/* TAB 1: USERS MANAGEMENT */}
       {activeTab === 'users' && (
