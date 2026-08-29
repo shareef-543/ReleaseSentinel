@@ -1,4 +1,4 @@
-﻿import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   Brain,
   Sliders,
@@ -363,7 +363,7 @@ export function MLStudio() {
               </div>
 
               {/* Multi-Model Comparison Bar */}
-              <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-800/80 text-center">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-800/80 text-center">
                 <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
                   <div className="text-[11px] text-slate-400 font-medium">Random Forest</div>
                   <div className="text-base font-bold font-mono text-cyan-400 mt-0.5">
@@ -382,6 +382,25 @@ export function MLStudio() {
                     {prediction.modelPredictions.logisticRegression}%
                   </div>
                 </div>
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800">
+                  <div className="text-[11px] text-slate-400 font-medium">ml-matrix Dot</div>
+                  <div className="text-base font-bold font-mono text-emerald-400 mt-0.5">
+                    {prediction.modelPredictions.matrixProjection}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Statistical Distribution Metrics from simple-statistics */}
+              <div className="flex flex-wrap items-center justify-between text-xs px-3 py-2 rounded-xl bg-slate-950/40 border border-slate-800/60 text-slate-400">
+                <span>
+                  <strong className="text-slate-300">Variance (σ²):</strong> {prediction.statisticalMetrics.variance}
+                </span>
+                <span>
+                  <strong className="text-slate-300">Std Dev (σ):</strong> {prediction.statisticalMetrics.standardDeviation}
+                </span>
+                <span>
+                  <strong className="text-slate-300">Z-Score:</strong> {prediction.statisticalMetrics.zScore}
+                </span>
               </div>
             </div>
 
