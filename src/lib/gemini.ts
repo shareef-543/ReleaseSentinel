@@ -119,9 +119,27 @@ Instructions:
   }
 
   const cleaned = stripCodeFences(text);
-  const parsed: unknown = JSON.parse(cleaned);
+  let parsed: unknown = null;
+
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    const extracted = extractJsonObject(cleaned) || extractJsonObject(text);
+    if (extracted) {
+      try {
+        parsed = JSON.parse(extracted);
+      } catch {
+        const fixed = fixCommonJsonErrors(extracted, []);
+        parsed = JSON.parse(fixed);
+      }
+    } else {
+      const fixed = fixCommonJsonErrors(cleaned, []);
+      parsed = JSON.parse(fixed);
+    }
+  }
+
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-    throw new Error('Gemini returned an invalid JSON object');
+    throw new Error('Gemini returned an invalid JSON structure');
   }
 
   const validated = validateAndNormalize(parsed as Partial<ReleaseManifest>);
