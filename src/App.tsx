@@ -27,11 +27,12 @@ import { BackendHistory } from '@/components/BackendHistory';
 import { SettingsModal } from '@/components/SettingsModal';
 import { AutonomousHealingPipeline } from '@/components/AutonomousHealingPipeline';
 import { CodeCorrectionPipeline } from '@/components/CodeCorrectionPipeline';
-import { Wand2, Database, ShieldCheck, ArrowRight, Zap, Code2, ShieldAlert } from 'lucide-react';
+import { MLStudio } from '@/components/MLStudio';
+import { Wand2, Database, ShieldCheck, ArrowRight, Zap, Code2, ShieldAlert, Brain } from 'lucide-react';
 
 function AppContent() {
   const { isAdmin, isLead } = useAuth();
-  const [activeView, setActiveView] = useState<'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin'>('pipeline');
+  const [activeView, setActiveView] = useState<'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin' | 'ml'>('pipeline');
   const [manifest, setManifest] = useState<ReleaseManifest>(SAMPLE_MANIFEST);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -225,6 +226,14 @@ function AppContent() {
                     </button>
 
                     <button
+                      onClick={() => setActiveView('ml')}
+                      className="flex items-center gap-2 rounded-xl border border-indigo-500/30 bg-indigo-500/10 px-5 py-3 text-sm font-semibold text-indigo-300 hover:bg-indigo-500/20 transition-all"
+                    >
+                      <Brain className="h-4 w-4 text-purple-400" />
+                      <span>ML Studio</span>
+                    </button>
+
+                    <button
                       onClick={() => setActiveView('history')}
                       className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-5 py-3 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-all"
                     >
@@ -318,6 +327,11 @@ function AppContent() {
         {/* VIEW 6: ADMIN CONSOLE & USER GOVERNANCE */}
         {activeView === 'admin' && (
           <AdminConsole />
+        )}
+
+        {/* VIEW 7: INTERACTIVE MACHINE LEARNING STUDIO & BENCHMARKS */}
+        {activeView === 'ml' && (
+          <MLStudio />
         )}
 
         {/* Settings Modal */}

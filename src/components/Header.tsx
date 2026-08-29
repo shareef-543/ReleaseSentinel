@@ -17,6 +17,7 @@ import {
   Zap,
   Code2,
   ShieldAlert,
+  Brain,
   User,
   LogOut,
   LogIn,
@@ -27,8 +28,8 @@ interface Props {
   analysis: AnalysisResult | null;
   analyzing: boolean;
   progressStep: number;
-  activeView: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin';
-  onSelectView: (view: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin') => void;
+  activeView: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin' | 'ml';
+  onSelectView: (view: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin' | 'ml') => void;
   onOpenSettings: () => void;
 }
 
@@ -127,6 +128,18 @@ export function Header({
               >
                 <Wand2 className="h-3.5 w-3.5" />
                 <span>ML & AI Studio</span>
+              </button>
+
+              <button
+                onClick={() => onSelectView('ml')}
+                className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                  activeView === 'ml'
+                    ? 'bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-600 text-white shadow-sm'
+                    : 'text-purple-300 hover:text-white hover:bg-purple-900/30'
+                }`}
+              >
+                <Brain className="h-3.5 w-3.5 text-purple-400" />
+                <span>ML Studio</span>
               </button>
 
               <button
