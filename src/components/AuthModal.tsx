@@ -54,11 +54,19 @@ export function AuthModal() {
     }
   };
 
-  const handleQuickLogin = (demoEmail: string, demoPass: string) => {
+  const handleQuickLogin = async (demoEmail: string, demoPass: string) => {
     setEmail(demoEmail);
     setPassword(demoPass);
     setError(null);
-    login(demoEmail, demoPass);
+    setLoading(true);
+    try {
+      const res = await login(demoEmail, demoPass);
+      if (!res.success) {
+        setError(res.error || 'Login failed');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
