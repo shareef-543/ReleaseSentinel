@@ -108,12 +108,15 @@ router.post('/correct-code', async (req: Request, res: Response, next: NextFunct
     const geminiKey = apiKey || config.geminiApiKey;
     const endpoint = `${CONSTANTS.GEMINI_BASE_URL}/${config.geminiModel}:generateContent?key=${geminiKey}`;
 
-    const systemPrompt = `You are an expert ${detectedLanguage} code reviewer and auto-healer.
-Fix the provided code by addressing all identified problems.
-Rules:
-- Return ONLY the corrected code. No markdown fences. No explanations.
-- Keep original structure and logic intact — only fix what is broken or unsafe.
-- Add inline comments prefixed with "// FIXED:" or "# FIXED:" where changes are made.`;
+    const systemPrompt = `You are a Principal Software Engineer and Compiler/Static Analysis expert specialized in ${detectedLanguage}.
+Your task is to REWRITE and PROPERLY FORMAT the provided code into clean, safe, efficient, and production-ready ${detectedLanguage} code.
+
+Formatting & Correction Rules:
+1. Fix all syntax errors, runtime bugs, security vulnerabilities (SQL injections, hardcoded secrets, XSS vectors), missing imports/dependencies, and unhandled errors.
+2. Format the code according to official ${detectedLanguage} style standards (e.g. PEP 8 for Python, Prettier/Airbnb for JS/TS, Google Java Style for Java, Effective Go for Go, Rustfmt for Rust).
+3. Ensure proper indentation, correct capitalization, proper bracket pairs, and clean structure.
+4. Add concise inline comments above every modified line (e.g. "// FIXED: Added parameterized SQL query to prevent injection" or "# FIXED: Replaced bare except with specific Exception handling").
+5. Return ONLY the raw corrected code with NO markdown code blocks (\`\`\` or \`\`\`${detectedLanguage}). Do NOT include conversational explanations outside of the code.`;
 
     const userPrompt = `Language: ${detectedLanguage}\n\nProblems to Fix:\n${problemsList || 'General review and quality improvements'}\n\nOriginal Code:\n${code}`;
 

@@ -388,13 +388,15 @@ async function correctCodeWithGemini(
           .join('\n')
       : 'Perform a general code review and fix any bugs, security issues, and code quality problems you find.';
 
-  const systemPrompt = `You are an expert ${language} code reviewer and auto-healer.
-Your task is to correct the provided code by fixing all identified problems.
-Rules:
-- Return ONLY the corrected code with NO markdown code fences, no explanations outside the code.
-- Keep the original structure and logic intact — only fix what is broken or unsafe.
-- Add concise inline comments where changes were made, prefixed with "// FIXED:" or "# FIXED:" etc.
-- If the code is already correct, return it unchanged.`;
+  const systemPrompt = `You are a Principal Software Engineer and Compiler/Static Analysis expert specialized in ${language}.
+Your task is to REWRITE and PROPERLY FORMAT the provided code into clean, safe, efficient, and production-ready ${language} code.
+
+Formatting & Correction Rules:
+1. Fix all syntax errors, runtime bugs, security vulnerabilities (SQL injections, hardcoded secrets, XSS vectors), missing imports/dependencies, and unhandled errors.
+2. Format the code according to official ${language} style standards (e.g. PEP 8 for Python, Prettier/Airbnb for JS/TS, Google Java Style for Java, Effective Go for Go, Rustfmt for Rust).
+3. Ensure proper indentation (consistent spaces/tabs), correct capitalization, proper bracket pairs, and clear variable naming.
+4. Add concise inline comments above every modified line (e.g. "// FIXED: Added parameterized SQL query to prevent injection" or "# FIXED: Replaced bare except with specific Exception handling").
+5. Return ONLY the raw corrected code. Do NOT wrap in markdown code blocks (\`\`\` or \`\`\`${language}). Do NOT include conversational explanations outside of the code.`;
 
   const userPrompt = `Language: ${language}
 
