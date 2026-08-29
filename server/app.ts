@@ -26,7 +26,11 @@ import adminRouter from './routes/admin.js';
 const app = express();
 
 // ── Global Middlewares ──
-app.use(cors({ origin: config.corsOrigins }));
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+}));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger);
