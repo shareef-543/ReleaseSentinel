@@ -3,6 +3,7 @@ import type { AnalysisResult } from '@/types';
 import { decisionColor, decisionLabel, riskTextColor } from '@/lib/ui';
 import { getBackendConfig } from '@/lib/backend/db';
 import { isGeminiConfigured } from '@/lib/gemini';
+import { useAuth } from '@/lib/auth/AuthContext';
 import {
   ShieldCheck,
   AlertTriangle,
@@ -15,6 +16,10 @@ import {
   Sparkles,
   Zap,
   Code2,
+  ShieldAlert,
+  User,
+  LogOut,
+  LogIn,
 } from 'lucide-react';
 
 interface Props {
@@ -22,8 +27,8 @@ interface Props {
   analysis: AnalysisResult | null;
   analyzing: boolean;
   progressStep: number;
-  activeView: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history';
-  onSelectView: (view: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history') => void;
+  activeView: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin';
+  onSelectView: (view: 'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin') => void;
   onOpenSettings: () => void;
 }
 
@@ -36,6 +41,8 @@ export function Header({
   onSelectView,
   onOpenSettings,
 }: Props) {
+  const { user, isAuthenticated, isAdmin, isLead, logout, openAuthModal } = useAuth();
+
   const steps = [
     'Loading release manifest',
     'Computing code change risk',
@@ -133,6 +140,21 @@ export function Header({
                 <Database className="h-3.5 w-3.5" />
                 <span>Backend History</span>
               </button>
+
+              {/* Admin Tab (Visible only to Admin or Lead) */}
+              {(isAdmin || isLead) && (
+                <button
+                  onClick={() => onSelectView('admin')}
+                  className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                    activeView === 'admin'
+                      ? 'bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 text-white shadow-sm'
+                      : 'text-purple-400 hover:text-purple-300 hover:bg-purple-950/30'
+                  }`}
+                >
+                  <ShieldAlert className="h-3.5 w-3.5" />
+                  <span>Admin Console</span>
+                </button>
+              )}
             </nav>
           </div>
 
@@ -161,7 +183,7 @@ export function Header({
             )}
 
             {/* Cloud & AI Badges */}
-            <div className="hidden md:flex items-center gap-1.5 text-[11px]">
+            <div className="hidden lg:flex items-center gap-1.5 text-[11px]">
               <span
                 className={`flex items-center gap-1 rounded-full px-2 py-0.5 border ${
                   hasGemini
@@ -181,7 +203,7 @@ export function Header({
                 }`}
               >
                 <Database className="h-2.5 w-2.5" />
-                {hasSupabase ? 'Supabase Cloud' : 'Local DB'}
+                {hasSupabase ? 'Supabase' : 'Local DB'}
               </span>
             </div>
 
@@ -193,6 +215,41 @@ export function Header({
             >
               <Settings className="h-4 w-4" />
             </button>
+
+            {/* User Profile / Auth Status */}
+            {isAuthenticated && user ? (
+              <div className="flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/80 p-1 pl-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-xs font-bold text-white uppercase">
+                    {user.name.charAt(0)}
+                  </div>
+                  <div className="hidden sm:block text-left">
+                    <div className="text-xs font-bold text-slate-200 truncate max-w-[100px] leading-tight">
+                      {user.name}
+                    </div>
+                    <div className="text-[10px] text-purple-400 uppercase font-mono leading-tight">
+                      {user.role}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={logout}
+                  title="Sign Out"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                >
+                  <LogOut className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={openAuthModal}
+                className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-cyan-500/20 hover:from-blue-500 hover:to-cyan-400 transition-all"
+              >
+                <LogIn className="h-3.5 w-3.5" />
+                <span>Sign In</span>
+              </button>
+            )}
           </div>
         </div>
 

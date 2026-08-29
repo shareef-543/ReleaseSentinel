@@ -1,4 +1,4 @@
-import type { ReleaseManifest, AnalysisResult, RolloutSimulation, Reassessment, FileProblem, FileMLAnalysisResult } from '../../src/types/index.js';
+import type { ReleaseManifest, AnalysisResult, RolloutSimulation, Reassessment, FileProblem } from '../../src/types/index.js';
 
 export interface ApiResponse<T = any> {
   success: boolean;
@@ -6,6 +6,49 @@ export interface ApiResponse<T = any> {
   error?: string;
   details?: any;
   timestamp: string;
+}
+
+export type UserRole = 'admin' | 'lead' | 'user';
+export type UserStatus = 'active' | 'suspended';
+
+export interface UserEntity {
+  id: string;
+  name: string;
+  email: string;
+  passwordHash: string;
+  salt: string;
+  role: UserRole;
+  status: UserStatus;
+  created_at: string;
+  last_login_at?: string | null;
+}
+
+export interface SafeUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: UserStatus;
+  created_at: string;
+  last_login_at?: string | null;
+}
+
+export interface AuditLogEntity {
+  id: string;
+  user_id?: string | null;
+  user_email?: string | null;
+  action: string;
+  details?: any;
+  timestamp: string;
+  ip?: string;
+}
+
+export interface SystemConfigEntity {
+  geminiModel: string;
+  maxStoredReleases: number;
+  autoApprovalThreshold: number;
+  maintenanceMode: boolean;
+  updated_at: string;
 }
 
 export interface StoredReleaseEntity {
@@ -20,6 +63,8 @@ export interface StoredReleaseEntity {
   reassessment?: Reassessment | null;
   notes?: string | null;
   source: string;
+  user_id?: string | null;
+  user_email?: string | null;
 }
 
 export interface StoredCorrectionEntity {
@@ -31,36 +76,55 @@ export interface StoredCorrectionEntity {
   problems_found: number;
   corrections_count: number;
   source: 'gemini' | 'fallback';
+  user_id?: string | null;
+  user_email?: string | null;
 }
 
 export interface ServerDatabaseSchema {
+  users: UserEntity[];
   releases: StoredReleaseEntity[];
   corrections: StoredCorrectionEntity[];
+  auditLogs: AuditLogEntity[];
+  systemConfig: SystemConfigEntity;
   config: {
     version: string;
     initialized_at: string;
   };
 }
 
-export interface DetectProblemsRequest {
-  content: string;
-  fileName?: string;
+// Request & Response DTOs
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  role?: UserRole;
 }
 
-export interface CorrectManifestRequest {
-  rawJson: string;
-  apiKey?: string;
-  detectedProblems?: FileProblem[];
+export interface LoginRequest {
+  email: string;
+  password: string;
 }
 
-export interface AnalyzeReleaseRequest {
-  manifest: ReleaseManifest;
-  autoSave?: boolean;
-  notes?: string;
+export interface AuthResponseData {
+  user: SafeUser;
+  token: string;
 }
 
-export interface SimulateRolloutRequest {
-  manifest: ReleaseManifest;
-  analysis: AnalysisResult;
-  percentage: number;
+export interface UpdateUserRequest {
+  name?: string;
+  role?: UserRole;
+  status?: UserStatus;
+  password?: string;
+}
+
+export interface AdminStatsResponse {
+  total_users: number;
+  active_users: number;
+  total_releases: number;
+  total_corrections: number;
+  total_audit_logs: number;
+  system_health: string;
+  gemini_model: string;
+  database_size_bytes: number;
+  uptime_seconds: number;
 }

@@ -9,6 +9,9 @@ import type {
 import { SAMPLE_MANIFEST } from '@/data/seed';
 import { analyzeRelease, simulateRollout, reassess } from '@/agent/releaseAgent';
 import { saveAnalysisRecord, getBackendConfig } from '@/lib/backend/db';
+import { AuthProvider, useAuth } from '@/lib/auth/AuthContext';
+import { AuthModal } from '@/components/AuthModal';
+import { AdminConsole } from '@/components/AdminConsole';
 import { Header } from '@/components/Header';
 import { ManifestSelector } from '@/components/ManifestSelector';
 import { RiskSummary } from '@/components/RiskSummary';
@@ -24,10 +27,11 @@ import { BackendHistory } from '@/components/BackendHistory';
 import { SettingsModal } from '@/components/SettingsModal';
 import { AutonomousHealingPipeline } from '@/components/AutonomousHealingPipeline';
 import { CodeCorrectionPipeline } from '@/components/CodeCorrectionPipeline';
-import { Wand2, Database, ShieldCheck, ArrowRight, Zap } from 'lucide-react';
+import { Wand2, Database, ShieldCheck, ArrowRight, Zap, Code2, ShieldAlert } from 'lucide-react';
 
-function App() {
-  const [activeView, setActiveView] = useState<'pipeline' | 'code' | 'dashboard' | 'studio' | 'history'>('pipeline');
+function AppContent() {
+  const { isAdmin, isLead } = useAuth();
+  const [activeView, setActiveView] = useState<'pipeline' | 'code' | 'dashboard' | 'studio' | 'history' | 'admin'>('pipeline');
   const [manifest, setManifest] = useState<ReleaseManifest>(SAMPLE_MANIFEST);
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
@@ -181,7 +185,12 @@ function App() {
           <AutonomousHealingPipeline onLoadIntoSentinel={handleLoadFromPipeline} />
         )}
 
-        {/* VIEW 2: FULL SENTINEL RISK DASHBOARD */}
+        {/* VIEW 2: MULTI-LANGUAGE CODE CORRECTION STUDIO */}
+        {activeView === 'code' && (
+          <CodeCorrectionPipeline />
+        )}
+
+        {/* VIEW 3: FULL SENTINEL RISK DASHBOARD */}
         {activeView === 'dashboard' && (
           <div className="space-y-6">
             {!showResults && !analyzing && (
@@ -208,11 +217,11 @@ function App() {
                     </button>
 
                     <button
-                      onClick={() => setActiveView('pipeline')}
-                      className="flex items-center gap-2 rounded-xl border border-cyan-500/30 bg-cyan-500/10 px-5 py-3 text-sm font-semibold text-cyan-300 hover:bg-cyan-500/20 transition-all"
+                      onClick={() => setActiveView('code')}
+                      className="flex items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-500/10 px-5 py-3 text-sm font-semibold text-purple-300 hover:bg-purple-500/20 transition-all"
                     >
-                      <Zap className="h-4 w-4" />
-                      <span>Autonomous ML & AI Pipeline</span>
+                      <Code2 className="h-4 w-4" />
+                      <span>Code Corrector</span>
                     </button>
 
                     <button
@@ -222,6 +231,16 @@ function App() {
                       <Database className="h-4 w-4" />
                       <span>Backend History</span>
                     </button>
+
+                    {(isAdmin || isLead) && (
+                      <button
+                        onClick={() => setActiveView('admin')}
+                        className="flex items-center gap-2 rounded-xl border border-purple-500/30 bg-purple-900/20 px-5 py-3 text-sm font-semibold text-purple-300 hover:bg-purple-900/40 transition-all"
+                      >
+                        <ShieldAlert className="h-4 w-4" />
+                        <span>Admin Console</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -280,11 +299,6 @@ function App() {
           </div>
         )}
 
-        {/* VIEW 3: ML DIAGNOSTIC & AI HEALING STUDIO */}
-        {activeView === 'code' && (
-          <CodeCorrectionPipeline />
-        )}
-
         {/* VIEW 4: ML DIAGNOSTIC & AI HEALING STUDIO */}
         {activeView === 'studio' && (
           <AICorrectionStudio
@@ -293,7 +307,7 @@ function App() {
           />
         )}
 
-        {/* VIEW 4: BACKEND REPOSITORY & HISTORY */}
+        {/* VIEW 5: BACKEND REPOSITORY & HISTORY */}
         {activeView === 'history' && (
           <BackendHistory
             onLoadRelease={handleLoadFromHistory}
@@ -301,8 +315,16 @@ function App() {
           />
         )}
 
+        {/* VIEW 6: ADMIN CONSOLE & USER GOVERNANCE */}
+        {activeView === 'admin' && (
+          <AdminConsole />
+        )}
+
         {/* Settings Modal */}
         <SettingsModal isOpen={settingsOpen} onClose={() => setSettingsOpen(false)} />
+
+        {/* Authentication Modal */}
+        <AuthModal />
 
         {/* Footer */}
         <footer className="mt-12 border-t border-slate-800/80 pt-6 text-center text-xs text-slate-500 space-y-1">
@@ -310,11 +332,19 @@ function App() {
             ReleaseSentinel — Autonomous Software Release Risk Planner & AI Auto-Healing Engine
           </div>
           <div className="text-[11px] text-slate-600">
-            Multi-Task Logistic ML • TF-IDF Cosine Similarity • Graph Propagation • Supabase PostgreSQL • Gemini AI Integration
+            Multi-Task Logistic ML • TF-IDF Cosine Similarity • Graph Propagation • Supabase PostgreSQL • Gemini AI Integration • RBAC
           </div>
         </footer>
       </main>
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

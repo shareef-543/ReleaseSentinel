@@ -11,6 +11,8 @@ import releasesRouter from './routes/releases.js';
 import correctionsRouter from './routes/corrections.js';
 import mlRouter from './routes/ml.js';
 import aiRouter from './routes/ai.js';
+import authRouter from './routes/auth.js';
+import adminRouter from './routes/admin.js';
 
 // ─────────────────────────────────────────
 // App Bootstrap
@@ -27,6 +29,8 @@ app.use(requestLogger);
 // ── Routes ──
 const API = CONSTANTS.API_PREFIX; // /api/v1
 
+app.use(`${API}/auth`,        authRouter);
+app.use(`${API}/admin`,       adminRouter);
 app.use(`${API}/health`,      healthRouter);
 app.use(`${API}/releases`,    releasesRouter);
 app.use(`${API}/corrections`, correctionsRouter);
@@ -82,6 +86,18 @@ export default app;
 
 function buildPortalHtml(): string {
   const endpoints = [
+    { method: 'POST',   tag: 'blue',   path: `${API}/auth/login`,      desc: 'User & Admin login (email + password) → JWT token' },
+    { method: 'POST',   tag: 'blue',   path: `${API}/auth/register`,   desc: 'Register new user account' },
+    { method: 'GET',    tag: 'green',  path: `${API}/auth/me`,         desc: 'Get profile of authenticated user' },
+    { method: 'GET',    tag: 'green',  path: `${API}/admin/stats`,     desc: '🛡️ Admin analytics overview & metrics' },
+    { method: 'GET',    tag: 'green',  path: `${API}/admin/users`,     desc: '🛡️ List all registered users (admin only)' },
+    { method: 'POST',   tag: 'blue',   path: `${API}/admin/users`,     desc: '🛡️ Create user account with assigned role' },
+    { method: 'PATCH',  tag: 'orange', path: `${API}/admin/users/:id`, desc: '🛡️ Update user role, status (suspend/activate), password' },
+    { method: 'DELETE', tag: 'red',    path: `${API}/admin/users/:id`, desc: '🛡️ Delete user account' },
+    { method: 'GET',    tag: 'green',  path: `${API}/admin/audit-logs`,desc: '🛡️ System audit trail & activity stream' },
+    { method: 'GET',    tag: 'green',  path: `${API}/admin/system-config`, desc: '🛡️ Get live system configuration' },
+    { method: 'PATCH',  tag: 'orange', path: `${API}/admin/system-config`, desc: '🛡️ Update Gemini model & risk parameters' },
+    { method: 'POST',   tag: 'red',    path: `${API}/admin/purge-data`,desc: '🛡️ Maintenance database purge' },
     { method: 'GET',    tag: 'green',  path: `${API}/health`,          desc: 'Server status, Gemini readiness & database stats' },
     { method: 'GET',    tag: 'green',  path: `${API}/releases`,        desc: 'List all stored releases  (?decision=GO|HOLD  &search=...)' },
     { method: 'GET',    tag: 'green',  path: `${API}/releases/:id`,    desc: 'Get one release by ID or release_id' },
@@ -92,6 +108,7 @@ function buildPortalHtml(): string {
     { method: 'DELETE', tag: 'red',    path: `${API}/corrections/:id`, desc: 'Delete a correction log entry' },
     { method: 'POST',   tag: 'blue',   path: `${API}/ml/detect`,       desc: 'Run ML diagnostic scanner → { content, fileName? }' },
     { method: 'POST',   tag: 'blue',   path: `${API}/ai/heal`,         desc: 'Full ML + Gemini AI healing pipeline → { rawJson, autoSave? }' },
+    { method: 'POST',   tag: 'blue',   path: `${API}/ai/correct-code`, desc: 'Universal multi-language source code correction' },
   ];
 
   const colors: Record<string, string> = {
